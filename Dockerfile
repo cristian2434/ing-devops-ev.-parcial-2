@@ -1,19 +1,19 @@
 # Etapa de dependencias (cache de Maven)
-FROM eclipse-temurin:17-jdk AS dependencies
+FROM eclipse-temurin:25-jdk AS dependencies
 WORKDIR /app
 COPY pom.xml mvnw ./
 COPY .mvn .mvn
 RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
 
 # Etapa de compilacion
-FROM eclipse-temurin:17-jdk AS compile
+FROM eclipse-temurin:25-jdk AS compile
 WORKDIR /app
 COPY --from=dependencies /root/.m2 /root/.m2
 COPY . .
 RUN chmod +x mvnw && ./mvnw clean package -DskipTests -B
 
 # Etapa de produccion (solo JRE)
-FROM eclipse-temurin:17-jre AS prod
+FROM eclipse-temurin:25-jre AS prod
 WORKDIR /app
 # curl se usa en el healthcheck del docker-compose
 RUN apt-get update \
