@@ -102,7 +102,7 @@ jobs:
           echo "latest=ghcr.io/${repo}:latest" >> "$GITHUB_OUTPUT"
 
       - name: Configurar Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Login en GHCR
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
