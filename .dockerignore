@@ -1,0 +1,31 @@
+# Control de versiones y CI
+.git
+.gitignore
+.github
+
+# Artefactos de build (se generan dentro de la imagen)
+target/
+
+# Secretos y credenciales (nunca deben entrar a la imagen)
+wallet/
+Wallet_*/
+.env
+*.pem
+*.jks
+
+# Archivos de Docker (no se necesitan dentro de la imagen)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Documentación
+*.md
+
+# IDEs y archivos temporales
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+*.iml
+*.log
