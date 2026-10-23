@@ -13,8 +13,8 @@
 
 ### Clonar el repositorio
 ```bash
-git clone https://github.com/cristian2434/ing.-devops.git
-cd ing.-devops
+git clone https://github.com/cristian2434/ing-devops-ev.-parcial-2.git
+cd ing-devops-ev.-parcial-2
 ```
 
 ### Configurar la base de datos
@@ -31,10 +31,18 @@ spring.datasource.password=<db_password>
 ```
 La aplicación queda disponible en `http://localhost:8081`.
 
-### Ejecutar con Docker
+### Ejecutar con Docker Compose
+Requiere un archivo `.env` (no versionado) con las credenciales y la carpeta `wallet/` de Oracle en la raíz:
 ```bash
-docker-compose up --build
+# .env
+DB_TNS_ALIAS=<alias_tns>
+DB_USERNAME=<usuario>
+DB_PASSWORD=<contraseña>
 ```
+```bash
+docker compose up --build
+```
+El servicio queda en `http://localhost:8081` y se puede verificar con `curl http://localhost:8081/api/health`.
 
 ### Ejecutar los tests
 ```bash
@@ -142,15 +150,48 @@ src/test/java/com/example/bdget/
 - Se revisa que el pipeline de CI (tests y build) pase en verde antes de aprobar el merge.
 - Se prioriza revisar: consistencia de nombres, que el cambio no rompa funcionalidad existente, y que incluya sus pruebas correspondientes si aplica.
 
-## CI/CD — GitHub Actions
+## Pipeline CI/CD — GitHub Actions
 
-El repositorio usa GitHub Actions (`.github/workflows/main.yml`) como entorno cloud simulado de integración continua:
-- Se ejecuta automáticamente con cada **push a `develop`** (job `test` + job `build`).
-- Se ejecuta automáticamente con cada **Pull Request hacia `main`** (job `test` + job `build`).
-- El job `test` corre `mvn test`, validando que toda la suite de pruebas unitarias pase.
-- El job `build` depende de que `test` sea exitoso (`needs: test`), compila el proyecto (`mvn package -DskipTests`) y sube el `.jar` generado como artefacto descargable.
+El pipeline está definido en `.github/workflows/main.yml` y se ejecuta en cada **push a `main` y `develop`** y en cada **Pull Request hacia `main`**. Si llega un nuevo push a la misma rama, se cancela la ejecución anterior (`concurrency`).
 
-Esto simula un flujo CI/CD básico: cada cambio que se integra a `develop` se valida automáticamente, y cada propuesta de llevar código a producción (`main`) pasa por el mismo control antes de aceptarse.
+```
+test ──┐
+       ├──> docker ──> deploy (solo push a main)
+security ┘
+```
+
+| Job | Qué hace | Indicador |
+|---|---|---|
+| `test` | `mvn clean verify`: 19 pruebas unitarias (JUnit) y verificación de cobertura con JaCoCo. Sube el reporte como artefacto. | IE2 |
+| `security` | Snyk analiza dependencias (`snyk test`) y código (`snyk code test`). Falla con vulnerabilidades de severidad **alta o crítica**. | IE3 |
+| `docker` | Construye la imagen con el `Dockerfile` multi-etapa. Solo si `test` y `security` pasaron. En `main` la publica en GHCR. | IE1 |
+| `deploy` | Levanta el servicio con Docker Compose en el runner, espera el estado `healthy`, ejecuta una prueba de humo a `/api/health` y publica un resumen. | IE4, IE5 |
+
+### Contenedores (IE1)
+- `Dockerfile` multi-etapa: dependencias (caché de Maven), compilación con JDK 17 y ejecución con imagen **JRE 17** más liviana.
+- Se ejecuta con un usuario no root (`appuser`).
+- `.dockerignore` excluye `target/`, credenciales, wallet y documentación, para que no entren a la imagen.
+- Los secretos nunca están en la imagen: se inyectan por variables de entorno y el wallet se monta como volumen de solo lectura.
+
+### Orquestación (IE5)
+`docker-compose.yml` define el servicio con: puerto `8081:8081`, `healthcheck` sobre `/api/health`, límites y reservas de CPU y memoria (`1 CPU / 1 GB` límite), `restart: unless-stopped`, `no-new-privileges` y `cap_drop: ALL`.
+
+### Seguridad y bloqueos (IE3)
+- **Dependabot** (`.github/dependabot.yml`) revisa semanalmente Maven, GitHub Actions y Docker y abre Pull Requests con las actualizaciones.
+- **Snyk** bloquea el pipeline si encuentra vulnerabilidades altas o críticas: como `docker` depende de `security`, la imagen no se construye ni se despliega.
+- En `Settings → Branches`, `main` queda protegida exigiendo que pasen los checks `test` y `security` antes de hacer merge.
+
+### Calidad (IE2)
+- La política de calidad exige **al menos 70 % de cobertura de líneas** (JaCoCo, regla `check` en el `pom.xml`). Si baja de ese valor, `mvn verify` falla y el pipeline se detiene.
+- Las pruebas cubren las capas controller, service, model y el manejador global de excepciones.
+
+### Trazabilidad (IE4)
+- Cada imagen se publica en GHCR etiquetada con el **SHA del commit** (`ghcr.io/<repo>:<sha>`) y con labels OCI (`revision`, `source`).
+- El job `deploy` despliega exactamente la imagen construida en ese mismo run, y el resumen del despliegue registra commit e imagen.
+- Todo cambio entra por Pull Request, por lo que cada despliegue se puede rastrear: commit → PR → ejecución del pipeline → imagen → despliegue.
+
+### Secretos requeridos en GitHub
+`SNYK_TOKEN`, `DB_TNS_ALIAS`, `DB_USERNAME`, `DB_PASSWORD` y `DB_WALLET_ZIP_B64` (wallet de Oracle en zip codificado en base64), en `Settings → Secrets and variables → Actions`.
 
 ## Funcionalidades agregadas en este trabajo
 
@@ -160,11 +201,17 @@ Esto simula un flujo CI/CD básico: cada cambio que se integra a `develop` se va
 
 ## Declaración de Uso de Inteligencia Artificial
 
-Se utilizó IA (Claude, Anthropic) como apoyo técnico para: estructurar los comandos Git del flujo de trabajo, generar plantillas de configuración (workflow de GitHub Actions), y redactar este README. Todas las decisiones técnicas, la implementación del código y las justificaciones fueron revisadas, validadas y comprendidas antes de integrarlas al repositorio. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
+Se utilizó IA (Claude, Anthropic) como apoyo técnico para: generar la plantilla del workflow de GitHub Actions, `docker-compose.yml`, `Dockerfile`, `dependabot.yml` y las pruebas unitarias adicionales, orientar la configuración de Snyk y los secretos, y redactar este README. Todo el contenido fue revisado, probado y validado por el equipo antes de integrarlo al repositorio. Las conclusiones y reflexiones personales fueron redactadas sin apoyo de IA. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
 
 ## Conclusiones y Reflexión Personal
 
-*(Sin apoyo de IA)*
+*(Cada integrante redacta su reflexión sin apoyo de IA: qué aprendió y cuál fue su contribución al proyecto.)*
+
+### Evaluación 2
+
+**Cristian Valenzuela:** *(escribir aquí)*
+
+### Evaluación 1 (referencia)
 
 Cristian Valenzuela: aprendi que existe diferentes tipos de ramas que antes no conocia. Ahora se que la rama feature se usa solo para agregar una nueva funcionalidad al proyecto; nunca habia trabajado con las ramas feature y hotfix antes. Antes solo usaba el main y a lo más creaba una rama extra para trabajar en un proyecto. 
 
