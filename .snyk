@@ -1,0 +1,263 @@
+# Politica de Snyk del proyecto bdget
+# Riesgos aceptados TEMPORALMENTE (vencen el 2027-01-31). Cualquier vulnerabilidad
+# High/Critical NUEVA que no este en esta lista seguira bloqueando el pipeline.
+version: v1.25.0
+ignore:
+  SNYK-JAVA-ORGGLASSFISHJAXB-20883142:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-CHQOSLOGBACK-17675439:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-17732890:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-17733746:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-20302889:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-20304748:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-21246252:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-21249759:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267072:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267073:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267075:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267077:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267078:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267079:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-20302843:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-20552494:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORK-19267098:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere Spring Boot 4.0.0 (migracion mayor); no hay correccion dentro de Spring Boot 3.5.15. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-16074612:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-16075266:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18512520:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18512572:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18518014:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18518039:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18518087:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18519010:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18519127:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18519148:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18519163:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18519180:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORKCLOUD-19268251:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGSPRINGFRAMEWORKSECURITY-19267391:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-17972608:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-19778370:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-20059683:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-20059179:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-COMFASTERXMLJACKSONCORE-21193287:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18512779:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18512810:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-18519194:
+    - '*':
+        reason: >-
+          Snyk indica que la correccion requiere spring-cloud-starter-config 5.0.5 (Spring Boot 4.x); no hay correccion dentro de Spring Cloud 2025.0.3. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado. Revisar antes de la fecha de expiracion.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHEHTTPCOMPONENTSCLIENT5-19432178:
+    - '*':
+        reason: >-
+          Sin actualizacion directa; la correccion existe en una version mas nueva de la dependencia transitiva (httpclient5 5.6.4). Pendiente de fijar esa version en el pom.xml. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHEHTTPCOMPONENTSCORE5-17817217:
+    - '*':
+        reason: >-
+          Sin actualizacion directa; la correccion existe en una version mas nueva de la dependencia transitiva (httpcore5-h2 5.4.3). Pendiente de fijar esa version en el pom.xml. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHEHTTPCOMPONENTSCORE5-17817218:
+    - '*':
+        reason: >-
+          Sin actualizacion directa; la correccion existe en una version mas nueva de la dependencia transitiva (httpcore5-h2 5.4.2). Pendiente de fijar esa version en el pom.xml. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
+  SNYK-JAVA-ORGBOUNCYCASTLE-20419436:
+    - '*':
+        reason: >-
+          Sin actualizacion directa; la correccion existe en una version mas nueva de la dependencia transitiva (bcprov-jdk18on 1.86). Pendiente de fijar esa version en el pom.xml. Riesgo aceptado temporalmente: proyecto academico con despliegue solo en entorno simulado.
+        expires: 2027-01-31T00:00:00.000Z
+        created: 2026-10-24T00:00:00.000Z
