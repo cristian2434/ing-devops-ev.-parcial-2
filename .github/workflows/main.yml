@@ -64,6 +64,11 @@ jobs:
       - name: Instalar Snyk CLI
         uses: snyk/actions/setup@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
 
+      # Snyk usa ./mvnw si existe. En Git (desde Windows) queda sin permiso
+      # de ejecucion y Snyk falla con "exit code: -13" (EACCES).
+      - name: Dar permiso de ejecucion al wrapper de Maven
+        run: chmod +x mvnw
+
       - name: Escaneo de dependencias
         run: snyk test --file=pom.xml --severity-threshold=high
         env:
