@@ -1,15 +1,17 @@
 # bdget - Microservicio Base DevOps
 
+> **Nota de entrega:** esta evaluación se realizó de forma **individual**, con autorización del docente.
+
 ## Propósito
 
-**bdget** es un microservicio desarrollado en **Spring Boot 3 (Java 17)** que expone una API REST para la gestión de estudiantes (`Student`), conectado a una base de datos Oracle. Este repositorio se preparó como base de trabajo para el pipeline DevOps que se construirá durante el semestre de la asignatura Ingeniería DevOps (DOY0101), aplicando control de versiones con Git/GitHub y automatización con GitHub Actions.
+**bdget** es un microservicio desarrollado en **Spring Boot 3 (Java 17)** que expone una API REST para la gestión de estudiantes (`Student`), conectado a una base de datos Oracle. Este repositorio es la base del pipeline DevOps de la asignatura Ingeniería DevOps (DOY0101): control de versiones con Git/GitHub y automatización de integración, seguridad, contenedores y despliegue con GitHub Actions.
 
 ## Instrucciones de configuración e instalación
 
 ### Requisitos previos
 - Java 17 (JDK)
 - Maven (o usar el wrapper incluido `mvnw` / `mvnw.cmd`)
-- Una instancia de base de datos Oracle (o Docker, ver más abajo)
+- Una instancia de base de datos Oracle y su wallet (o Docker, ver más abajo)
 
 ### Clonar el repositorio
 ```bash
@@ -24,6 +26,7 @@ spring.datasource.url=<db_url>
 spring.datasource.username=<db_username>
 spring.datasource.password=<db_password>
 ```
+Los valores reales nunca se suben al repositorio. En el contenedor llegan por variables de entorno (`SPRING_DATASOURCE_*`).
 
 ### Ejecutar el proyecto localmente
 ```bash
@@ -32,7 +35,7 @@ spring.datasource.password=<db_password>
 La aplicación queda disponible en `http://localhost:8081`.
 
 ### Ejecutar con Docker Compose
-Requiere un archivo `.env` (no versionado) con las credenciales y la carpeta `wallet/` de Oracle en la raíz:
+Requiere un archivo `.env` (no versionado) con las credenciales y la carpeta `wallet/` de Oracle en la raíz del proyecto (no versionada):
 ```bash
 # .env
 DB_TNS_ALIAS=<alias_tns>
@@ -42,7 +45,7 @@ DB_PASSWORD=<contraseña>
 ```bash
 docker compose up --build
 ```
-El servicio queda en `http://localhost:8081` y se puede verificar con `curl http://localhost:8081/api/health`.
+El servicio queda en `http://localhost:8081` y se verifica con `curl http://localhost:8081/api/health`.
 
 ### Ejecutar los tests
 ```bash
@@ -91,8 +94,8 @@ Elegí **GitFlow** para este proyecto porque:
 - A diferencia de Trunk-Based Development —que exige integración continua muy frecuente y una suite de pruebas automatizadas robusta para minimizar riesgos de romper `main`—, GitFlow se adapta mejor a un ritmo de trabajo con avances puntuales, no despliegues varias veces al día.
 
 ### Estructura de Ramas del repositorio
-- `main`: código estable, listo para producción.
-- `develop`: rama de integración, donde se juntan los features antes de pasar a `main`.
+- `main`: código estable, listo para producción. Un push a esta rama dispara el despliegue.
+- `develop`: rama de integración, donde se juntan los cambios antes de pasar a `main`.
 - `feature/<nombre>`: nuevas funcionalidades, creadas desde `develop` y mergeadas de vuelta a `develop`.
 - `hotfix/<nombre>`: correcciones urgentes, creadas desde `main` y mergeadas tanto a `main` como a `develop`.
 
@@ -110,12 +113,14 @@ Formato: `tipo: descripción breve en presente`
 | `chore:` | tareas de mantenimiento (configuración, dependencias, etc.) |
 | `test:` | agregar o modificar tests |
 | `ci:` | cambios en la configuración de integración continua |
+| `sec:` | cambios de seguridad (por ejemplo, política de Snyk) |
 
 Ejemplos reales usados en este repositorio:
 - `feat: agregar busqueda de estudiantes por nombre`
 - `feat: agregar endpoint de health check`
 - `fix: capturar ruta real de la peticion y eliminar imports duplicados`
-- `ci: activar trigger push a develop y pull_request a main`
+- `ci: usar nombre de imagen valido para GHCR`
+- `sec: registrar riesgos aceptados de Snyk con vencimiento`
 
 ## Naming de Ramas
 
@@ -125,91 +130,153 @@ Ejemplos reales usados en este repositorio:
 ## Estructura de Carpetas
 
 ```
+.github/
+├── dependabot.yml        # Actualización automática de dependencias
+└── workflows/main.yml    # Pipeline CI/CD
+docs/img/                 # Capturas de evidencia del pipeline
 src/main/java/com/example/bdget/
-├── controller/    # Endpoints REST (StudentController, HealthController)
-├── service/       # Lógica de negocio (interfaz + implementación)
-├── repository/    # Acceso a datos (Spring Data JPA)
-├── model/         # Entidades (Student)
-└── exception/     # Manejo global de excepciones
-
+├── controller/           # Endpoints REST (StudentController, HealthController)
+├── service/              # Lógica de negocio (interfaz + implementación)
+├── repository/           # Acceso a datos (Spring Data JPA)
+├── model/                # Entidades (Student)
+└── exception/            # Manejo global de excepciones
 src/test/java/com/example/bdget/
-└── ...            # Tests unitarios por capa (controller, service)
+└── ...                   # Tests unitarios por capa (controller, service, model, exception)
+Dockerfile                # Imagen multi-etapa
+docker-compose.yml        # Orquestación y despliegue
+.snyk                     # Política de Snyk (riesgos aceptados con vencimiento)
 ```
 
 ## Control de Versiones y Flujo de Merge
 
-1. Todo cambio se integra vía **Pull Request (PR)**, nunca con push directo a `main` o `develop`.
-2. Se verifica que el pipeline de GitHub Actions pase correctamente (tests + build) antes de mergear cada PR.
+1. Los cambios se desarrollan en `develop` (o en ramas `feature/` y `hotfix/`) y llegan a `main` **solo mediante Pull Request**.
+2. Se verifica que el pipeline de GitHub Actions pase correctamente antes de mergear cada PR.
 3. Los `hotfix`, una vez mergeados a `main`, también se mergean a `develop` para mantener sincronizadas ambas ramas.
 4. Las ramas ya mergeadas se eliminan para mantener el repositorio limpio.
 
 ## Estrategia de Revisión
 
-- Ningún cambio llega a `main` o `develop` sin pasar por un Pull Request, aunque se trate de un único desarrollador, para dejar registro formal y trazable de cada cambio.
+- Ningún cambio llega a `main` sin pasar por un Pull Request, aunque se trate de un único desarrollador, para dejar registro formal y trazable de cada cambio.
 - El PR describe brevemente qué cambia y por qué.
-- Se revisa que el pipeline de CI (tests y build) pase en verde antes de aprobar el merge.
+- Se revisa que el pipeline de CI (seguridad, tests, calidad y build) pase en verde antes de aprobar el merge.
 - Se prioriza revisar: consistencia de nombres, que el cambio no rompa funcionalidad existente, y que incluya sus pruebas correspondientes si aplica.
+
+---
 
 ## Pipeline CI/CD — GitHub Actions
 
-El pipeline está definido en `.github/workflows/main.yml` y se ejecuta en cada **push a `main` y `develop`** y en cada **Pull Request hacia `main`**. Si llega un nuevo push a la misma rama, se cancela la ejecución anterior (`concurrency`).
+El pipeline está definido en `.github/workflows/main.yml`. Se ejecuta en cada **push a `main` y `develop`** y en cada **Pull Request hacia `main`**. Si llega un nuevo push a la misma rama, se cancela la ejecución anterior (`concurrency`).
+
+Los seis jobs están **encadenados con `needs`**: cada uno solo corre si el anterior terminó bien. Si uno falla, los siguientes se omiten.
 
 ```
-test ──┐
-       ├──> docker ──> deploy (solo push a main)
-security ┘
+Snyk Security Scan → Run Tests with JaCoCo → SonarCloud Analysis → Build JAR → Build Docker Image → Deploy (Docker Compose)
 ```
 
 | Job | Qué hace | Indicador |
 |---|---|---|
+| `snyk-scan` | `snyk test` (dependencias) y `snyk code test` (código). Falla con vulnerabilidades de severidad **alta o crítica**. Guarda el reporte JSON como artefacto. | IE3 |
 | `test` | `mvn clean verify`: 19 pruebas unitarias (JUnit) y verificación de cobertura con JaCoCo. Sube el reporte como artefacto. | IE2 |
-| `security` | Snyk analiza dependencias (`snyk test`) y código (`snyk code test`). Falla con vulnerabilidades de severidad **alta o crítica**. | IE3 |
-| `docker` | Construye la imagen con el `Dockerfile` multi-etapa. Solo si `test` y `security` pasaron. En `main` la publica en GHCR. | IE1 |
-| `deploy` | Levanta el servicio con Docker Compose en el runner, espera el estado `healthy`, ejecuta una prueba de humo a `/api/health` y publica un resumen. | IE4, IE5 |
+| `sonar` | Análisis de calidad con SonarCloud y espera el Quality Gate (`sonar.qualitygate.wait=true`). | IE3 |
+| `build` | Empaqueta el JAR (`mvn clean package -DskipTests`) y lo sube como artefacto. | IE1 |
+| `docker` | Construye la imagen con el `Dockerfile` multi-etapa. En `main` la publica en GHCR. | IE1, IE4 |
+| `deploy` | Solo en push a `main`. Levanta el servicio con Docker Compose en el runner, espera el estado `healthy`, ejecuta una prueba de humo a `/api/health` y publica un resumen. | IE4, IE5 |
+
+En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin publicarla); el despliegue ocurre únicamente tras el merge a `main`.
+
+![Pipeline completo en main](docs/img/01-pipeline-main.png)
 
 ### Contenedores (IE1)
-- `Dockerfile` multi-etapa: dependencias (caché de Maven), compilación con JDK 17 y ejecución con imagen **JRE 17** más liviana.
+- `Dockerfile` multi-etapa: dependencias (caché de Maven), compilación con JDK 17 y ejecución con imagen **JRE 17**, más liviana.
 - Se ejecuta con un usuario no root (`appuser`).
 - `.dockerignore` excluye `target/`, credenciales, wallet y documentación, para que no entren a la imagen.
 - Los secretos nunca están en la imagen: se inyectan por variables de entorno y el wallet se monta como volumen de solo lectura.
 
 ### Orquestación (IE5)
-`docker-compose.yml` define el servicio con: puerto `8081:8081`, `healthcheck` sobre `/api/health`, límites y reservas de CPU y memoria (`1 CPU / 1 GB` límite), `restart: unless-stopped`, `no-new-privileges` y `cap_drop: ALL`.
+`docker-compose.yml` define el servicio con:
+- Puerto `8081:8081`.
+- `healthcheck` sobre `/api/health` (cada 15 s, 5 reintentos, 60 s de gracia al arrancar).
+- Límites y reservas de recursos: límite de **1 CPU y 1 GB**, reserva de 0,5 CPU y 512 MB.
+- `restart: unless-stopped`.
+- Endurecimiento: `no-new-privileges` y `cap_drop: ALL`.
+- Wallet de Oracle montado como volumen de solo lectura.
+- La imagen se parametriza con `APP_IMAGE`, de modo que el despliegue usa exactamente la imagen construida en el mismo run.
 
 ### Seguridad y bloqueos (IE3)
-- **Dependabot** (`.github/dependabot.yml`) revisa semanalmente Maven, GitHub Actions y Docker y abre Pull Requests con las actualizaciones.
-- **Snyk** bloquea el pipeline si encuentra vulnerabilidades altas o críticas: como `docker` depende de `security`, la imagen no se construye ni se despliega.
-- En `Settings → Branches`, `main` queda protegida exigiendo que pasen los checks `test` y `security` antes de hacer merge.
+- **Dependabot** (`.github/dependabot.yml`) revisa semanalmente Maven, GitHub Actions y Docker y abre Pull Requests con las actualizaciones. Las actualizaciones que implican saltos mayores (por ejemplo, Spring Boot 4) no se aplican automáticamente: se evalúan antes de hacer merge.
+- **Snyk** bloquea el pipeline si encuentra vulnerabilidades altas o críticas. Como los jobs están encadenados, si falla no se ejecutan las pruebas, ni la imagen, ni el despliegue.
+- **SonarCloud** analiza la calidad del código y el pipeline espera su Quality Gate (`Sonar way`).
+- En `Settings → Rules`, `main` queda protegida exigiendo que pasen los checks `Snyk Security Scan`, `Run Tests with JaCoCo` y `SonarCloud Analysis` antes de hacer merge.
+
+![Dependabot](docs/img/04-dependabot.png)
+![Snyk - dependencias](docs/img/06-snyk-dependencias.png)
+![Snyk - código](docs/img/06b-snyk-codigo.png)
+
+#### Riesgo aceptado temporalmente (`.snyk`)
+Tras actualizar a Spring Boot 3.5.15, Spring Cloud 2025.0.3 y JaCoCo 0.8.14, el escaneo bajó de 82 a **43 hallazgos** de severidad alta o crítica (Tomcat, Spring Framework, Logback, BouncyCastle y otras librerías internas de Spring). En todos, la corrección solo existe en **Spring Boot 4.0.0** (o Spring Cloud Config 5.0.5, que también exige Boot 4).
+
+Migrar a Spring Boot 4 es un cambio mayor (otra versión de Hibernate y Jackson, cambios en las pruebas), que queda **fuera del alcance de esta evaluación**. Por eso estos 43 hallazgos están registrados en el archivo `.snyk`, cada uno con su motivo y una **fecha de vencimiento (31 de enero de 2027)**. No se trata de vulnerabilidades inexistentes, sino de **riesgo aceptado de forma temporal y documentada**, con el plan de migrar a Spring Boot 4. Cualquier hallazgo alto o crítico **nuevo** que no esté en esa lista sigue bloqueando el pipeline.
 
 ### Calidad (IE2)
 - La política de calidad exige **al menos 70 % de cobertura de líneas** (JaCoCo, regla `check` en el `pom.xml`). Si baja de ese valor, `mvn verify` falla y el pipeline se detiene.
-- Las pruebas cubren las capas controller, service, model y el manejador global de excepciones.
+- Las 19 pruebas unitarias cubren las capas controller, service, model y el manejador global de excepciones, además del endpoint de salud.
+- SonarCloud midió en este análisis **100 % de cobertura**, **0 % de duplicación** y el Quality Gate en estado **Passed**. El 70 % es el umbral que bloquea el pipeline; el 100 % es lo medido.
+
+![SonarCloud - Quality Gate](docs/img/05-sonarcloud.png)
+![SonarCloud - cobertura](docs/img/05b-sonarcloud-cobertura.png)
 
 ### Trazabilidad (IE4)
-- Cada imagen se publica en GHCR etiquetada con el **SHA del commit** (`ghcr.io/<repo>:<sha>`) y con labels OCI (`revision`, `source`).
-- El job `deploy` despliega exactamente la imagen construida en ese mismo run, y el resumen del despliegue registra commit e imagen.
-- Todo cambio entra por Pull Request, por lo que cada despliegue se puede rastrear: commit → PR → ejecución del pipeline → imagen → despliegue.
+- Cada imagen se publica en GHCR etiquetada con el **SHA del commit** y con `latest`, y lleva labels OCI (`revision`, `source`).
+- El nombre de la imagen es fijo: `ghcr.io/cristian2434/ing-devops-ev-parcial-2`. No se usa el nombre del repositorio porque este contiene `.-`, una combinación que Docker no acepta en una referencia de imagen.
+- El job `deploy` despliega exactamente la imagen construida en ese mismo run, y el resumen del despliegue registra el commit y la imagen. En la captura, el SHA del commit coincide con la etiqueta de la imagen.
+- Todo cambio llega a `main` por Pull Request, por lo que cada despliegue se puede rastrear: commit → PR → ejecución del pipeline → imagen → despliegue.
+
+![Resumen del despliegue](docs/img/02-deploy-trazabilidad.png)
+![Imagen en GHCR](docs/img/03-imagen-ghcr.png)
 
 ### Secretos requeridos en GitHub
-`SNYK_TOKEN`, `DB_TNS_ALIAS`, `DB_USERNAME`, `DB_PASSWORD` y `DB_WALLET_ZIP_B64` (wallet de Oracle en zip codificado en base64), en `Settings → Secrets and variables → Actions`.
+En `Settings → Secrets and variables → Actions`:
+
+| Secreto | Uso |
+|---|---|
+| `SNYK_TOKEN` | Autenticación de Snyk |
+| `SONAR_TOKEN` | Autenticación de SonarCloud |
+| `DB_TNS_ALIAS` | Alias TNS de la base Oracle (por ejemplo, `pruebadb_high`) |
+| `DB_USERNAME` | Usuario de la base de datos |
+| `DB_PASSWORD` | Contraseña de la base de datos |
+| `DB_WALLET_ZIP_B64` | Wallet de Oracle en ZIP codificado en base64 |
+
+El wallet que se usa en el despliegue contiene solo `cwallet.sso`, `tnsnames.ora` y `sqlnet.ora`, con `sqlnet.ora` apuntando a `/app/wallet`, que es donde Compose lo monta. Ningún secreto ni el wallet están en el repositorio.
+
+---
 
 ## Funcionalidades agregadas en este trabajo
 
 - **Búsqueda de estudiantes por nombre**: endpoint `GET /students/search?name=` (búsqueda parcial, insensible a mayúsculas/minúsculas), implementado en las capas Repository, Service y Controller, con su test unitario correspondiente.
-- **Health Check**: endpoint `GET /api/health` que retorna el estado del servicio, útil para monitoreo básico en el entorno cloud simulado.
+- **Health Check**: endpoint `GET /api/health` que retorna el estado del servicio, usado por el healthcheck de Docker Compose y por la prueba de humo del despliegue.
 - **Hotfix**: corrección en `GlobalExceptionHandler` para capturar la ruta real donde ocurre un error no controlado (antes no se informaba el endpoint afectado), además de limpieza de imports duplicados.
 
 ## Declaración de Uso de Inteligencia Artificial
 
-Se utilizó IA (Claude, Anthropic) como apoyo técnico para: generar la plantilla del workflow de GitHub Actions, `docker-compose.yml`, `Dockerfile`, `dependabot.yml` y las pruebas unitarias adicionales, orientar la configuración de Snyk y los secretos, y redactar este README. Todo el contenido fue revisado, probado y validado por el equipo antes de integrarlo al repositorio. Las conclusiones y reflexiones personales fueron redactadas sin apoyo de IA. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
+Se utilizó IA (Claude, de Anthropic) como apoyo técnico para:
+- Generar la plantilla del workflow de GitHub Actions, el `Dockerfile`, el `docker-compose.yml`, el `dependabot.yml` y las pruebas unitarias adicionales.
+- Orientar la configuración de Snyk, SonarCloud, los secretos de GitHub y el wallet de Oracle.
+- Ayudar a diagnosticar errores del pipeline (por ejemplo, el nombre de imagen inválido y el wallet incompleto).
+- Redactar un borrador de las secciones técnicas de este README.
+
+Todo el contenido generado fue revisado, probado y validado por mí antes de integrarlo al repositorio: el pipeline se ejecutó completo en `main` y el despliegue quedó verificado. Las conclusiones y la reflexión personal fueron redactadas por mí; se usó IA únicamente para corregir ortografía y puntuación. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
 
 ## Conclusiones y Reflexión Personal
 
-*(Cada integrante redacta su reflexión sin apoyo de IA: qué aprendió y cuál fue su contribución al proyecto.)*
-
 ### Evaluación 2
 
-**Cristian Valenzuela:** *(escribir aquí)*
+Cristian Valenzuela: Aprendí que el pipeline crea una imagen o varias imágenes a través de Docker. También entendí que existen varias herramientas para las pruebas unitarias, y no sabía que existía JaCoCo, porque antes había trabajado solo con JUnit, que ejecuta las pruebas, y con Mockito, que crea objetos simulados para aislar lo que se prueba. Tampoco sabía que Dependabot sirve para escanear las dependencias del proyecto, ni que para analizar el código se usa SonarQube o Snyk, o ambos a la vez. Además, aprendí a hacer el despliegue automático a través de Docker Compose y a reforzar cómo crear el GitHub Actions en la rama main, agregando más ramas si uno quiere.
+
+En el Docker Compose puedo implementar una orquestación de contenedores, según el caso, para asegurar la estabilidad y la calidad.
+
+Decidí aceptar los riesgos con fecha de vencimiento en lugar de migrar a Spring Boot 4.
+
+Yo aporté en la implementación del pipeline de GitHub Actions con la construcción de la imagen con Docker, la ejecución de pruebas unitarias con JUnit (JaCoCo mide cuánto código cubren esas pruebas), la implementación de la orquestación de contenedores, el aseguramiento de la estabilidad y la calidad del sistema, la configuración de alertas o bloqueos si el análisis de seguridad falla y la configuración del Dockerfile de mi microservicio.
 
 ### Evaluación 1 (referencia)
 
