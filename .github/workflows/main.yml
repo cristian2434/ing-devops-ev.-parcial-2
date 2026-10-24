@@ -77,13 +77,45 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
   # ---------------------------------------------------------------
+  # 2b) Analisis de calidad de codigo con SonarCloud (SAST). Espera el
+  #     resultado del Quality Gate y falla si no se cumple (IE3).
+  # ---------------------------------------------------------------
+  sonar:
+    name: Analisis de calidad (SonarCloud)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
+
+      - name: Analisis con SonarCloud
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn -B clean verify \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            -Dsonar.projectKey=cristian2434_ing-devops-ev.-parcial-2 \
+            -Dsonar.organization=cristian2434 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+            -Dsonar.qualitygate.wait=true
+
+  # ---------------------------------------------------------------
   # 3) Construccion de la imagen Docker. Solo se publica en GHCR
   #    cuando el push es a main. Cada imagen queda etiquetada con el
   #    SHA del commit (trazabilidad, IE4).
   # ---------------------------------------------------------------
   docker:
     name: Construir imagen Docker
-    needs: [test, security]
+    needs: [test, security, sonar]
     runs-on: ubuntu-latest
     permissions:
       contents: read
