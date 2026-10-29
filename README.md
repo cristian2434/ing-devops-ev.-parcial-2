@@ -223,7 +223,7 @@ Migrar a Spring Boot 4 es un cambio mayor (otra versión de Hibernate y Jackson,
 - SonarCloud midió en este análisis **100 % de cobertura**, **0 % de duplicación** y el Quality Gate en estado **Passed**. El 70 % es el umbral que bloquea el pipeline; el 100 % es lo medido.
 
 ![SonarCloud - Quality Gate](docs/img/05-sonarcloud.png)
-![SonarCloud - cobertura](docs/img/05b-sonarcloud-cobertura.png)
+![SonarCloud - cobertura](docs/img/05b-sonarcloud-cobertura.webp)
 
 ### Trazabilidad (IE4)
 - Cada imagen se publica en GHCR etiquetada con el **SHA del commit** y con `latest`, y lleva labels OCI (`revision`, `source`).
