@@ -180,7 +180,7 @@ Snyk Security Scan → Run Tests with JaCoCo → SonarCloud Analysis → Build J
 | `sonar` | Análisis de calidad con SonarCloud y espera el Quality Gate (`sonar.qualitygate.wait=true`). | IE3 |
 | `build` | Empaqueta el JAR (`mvn clean package -DskipTests`) y lo sube como artefacto. | IE1 |
 | `docker` | Construye la imagen con el `Dockerfile` multi-etapa. En `main` la publica en GHCR. | IE1, IE4 |
-| `deploy` | Solo en push a `main`. Levanta el servicio con Docker Compose en el runner, espera el estado `healthy`, ejecuta una prueba de humo a `/api/health` y publica un resumen. | IE4, IE5 |
+| `deploy` | Solo en push a `main`. Se conecta por SSH a una instancia **EC2 de AWS Academy**, copia el `docker-compose.yml` y el wallet, descarga la imagen desde GHCR y levanta el servicio con Docker Compose. Espera el estado `healthy`, ejecuta una prueba de humo a `http://<IP-EC2>:8081/api/health` desde el runner y publica un resumen. | IE4, IE5 |
 
 En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin publicarla); el despliegue ocurre únicamente tras el merge a `main`.
 
@@ -201,6 +201,7 @@ En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin pub
 - Endurecimiento: `no-new-privileges` y `cap_drop: ALL`.
 - Wallet de Oracle montado como volumen de solo lectura.
 - La imagen se parametriza con `APP_IMAGE`, de modo que el despliegue usa exactamente la imagen construida en el mismo run.
+- El despliegue se ejecuta en una **instancia EC2 de AWS Academy** (Amazon Linux 2023, `t3.small`) con Docker y Docker Compose, que hace de entorno cloud. Ver la sección *Entorno de despliegue en AWS EC2*.
 
 ### Seguridad y bloqueos (IE3)
 - **Dependabot** (`.github/dependabot.yml`) revisa semanalmente Maven, GitHub Actions y Docker y abre Pull Requests con las actualizaciones. Las actualizaciones que implican saltos mayores (por ejemplo, Spring Boot 4) no se aplican automáticamente: se evalúan antes de hacer merge.
@@ -248,8 +249,28 @@ En `Settings → Secrets and variables → Actions`:
 | `DB_USERNAME` | Usuario de la base de datos |
 | `DB_PASSWORD` | Contraseña de la base de datos |
 | `DB_WALLET_ZIP_B64` | Wallet de Oracle en ZIP codificado en base64 |
+| `EC2_HOST` | IP pública (elástica) de la instancia EC2 de despliegue |
+| `EC2_SSH_KEY` | Llave privada SSH (`.pem`) para conectarse a la EC2 |
+| `EC2_USER` (opcional) | Usuario SSH de la EC2; si no existe se usa `ec2-user` |
 
 El wallet que se usa en el despliegue contiene solo `cwallet.sso`, `tnsnames.ora` y `sqlnet.ora`, con `sqlnet.ora` apuntando a `/app/wallet`, que es donde Compose lo monta. Ningún secreto ni el wallet están en el repositorio.
+
+### Entorno de despliegue en AWS EC2
+El job `deploy` publica la aplicación en una instancia EC2 creada en AWS Academy:
+- **AMI:** Amazon Linux 2023, tipo `t3.small`, con IP elástica para que la dirección no cambie entre sesiones del laboratorio.
+- **Security Group:** entrada TCP 22 (SSH, usado por el pipeline) y TCP 8081 (la API).
+- **Preparación única de la instancia** (Docker y el plugin de Compose):
+```bash
+sudo dnf install -y docker
+sudo systemctl enable --now docker
+sudo usermod -aG docker ec2-user
+sudo mkdir -p /usr/local/lib/docker/cli-plugins
+sudo curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+```
+- **Flujo del despliegue:** el pipeline se conecta por SSH con `EC2_SSH_KEY`, copia `docker-compose.yml` y el wallet a `~/bdget`, escribe un `.env` con `APP_IMAGE` (etiquetada con el SHA del commit) y las credenciales, inicia sesión en GHCR desde la EC2, ejecuta `docker compose pull` y `docker compose up -d`, y espera a que el contenedor quede `healthy`.
+- **Verificación:** desde el runner se consulta `http://<IP-EC2>:8081/api/health`; con eso se valida también que el puerto 8081 esté abierto.
+- **Limitación conocida:** el SSH está abierto a cualquier IP porque los runners de GitHub no tienen IP fija; el acceso queda protegido por la llave privada, que solo existe como secreto del repositorio.
 
 ---
 
@@ -267,7 +288,7 @@ Se utilizó IA (Claude, de Anthropic) como apoyo técnico para:
 - Ayudar a diagnosticar errores del pipeline (por ejemplo, el nombre de imagen inválido y el wallet incompleto).
 - Redactar un borrador de las secciones técnicas de este README.
 - Revisar y optimizar los tiempos del pipeline (un solo escaneo de Snyk, timeout del Quality Gate y healthcheck más rápido) y revisar este README.
-
+- Adaptar el job de despliegue para publicar en una instancia EC2 de AWS Academy por SSH, y orientar la preparación de la instancia (Docker, Security Group y secretos).
 
 Todo el contenido generado fue revisado, probado y validado por mí antes de integrarlo al repositorio: el pipeline se ejecutó completo en `main` y el despliegue quedó verificado. Las conclusiones y la reflexión personal fueron redactadas por mí; se usó IA únicamente para corregir ortografía y puntuación. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
 
