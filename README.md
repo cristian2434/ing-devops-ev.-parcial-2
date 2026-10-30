@@ -142,6 +142,7 @@ src/main/java/com/example/bdget/
 └── exception/            # Manejo global de excepciones
 src/test/java/com/example/bdget/
 └── ...                   # Tests unitarios por capa (controller, service, model, exception)
+web/                      # Página estática publicada en Apache (EC2)
 Dockerfile                # Imagen multi-etapa
 docker-compose.yml        # Orquestación y despliegue
 .snyk                     # Política de Snyk (riesgos aceptados con vencimiento)
@@ -180,7 +181,7 @@ Snyk Security Scan → Run Tests with JaCoCo → SonarCloud Analysis → Build J
 | `sonar` | Análisis de calidad con SonarCloud y espera el Quality Gate (`sonar.qualitygate.wait=true`). | IE3 |
 | `build` | Empaqueta el JAR (`mvn clean package -DskipTests`) y lo sube como artefacto. | IE1 |
 | `docker` | Construye la imagen con el `Dockerfile` multi-etapa. En `main` la publica en GHCR. | IE1, IE4 |
-| `deploy` | Solo en push a `main`. Se conecta por SSH a una instancia **EC2 de AWS Academy**, copia el `docker-compose.yml` y el wallet, descarga la imagen desde GHCR y levanta el servicio con Docker Compose. Espera el estado `healthy`, ejecuta una prueba de humo a `http://<IP-EC2>:8081/api/health` desde el runner y publica un resumen. | IE4, IE5 |
+| `deploy` | Solo en push a `main`. Se conecta por SSH a una instancia **EC2 de AWS Academy**, copia el `docker-compose.yml` y el wallet, descarga la imagen desde GHCR y levanta el servicio con Docker Compose. Espera el estado `healthy`, ejecuta una prueba de humo a `/api/health` dentro de la EC2 (loopback), publica la página web (`web/index.html`) en Apache y deja un resumen. | IE4, IE5 |
 
 En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin publicarla); el despliegue ocurre únicamente tras el merge a `main`.
 
@@ -207,7 +208,7 @@ En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin pub
 - **Dependabot** (`.github/dependabot.yml`) revisa semanalmente Maven, GitHub Actions y Docker y abre Pull Requests con las actualizaciones. Las actualizaciones que implican saltos mayores (por ejemplo, Spring Boot 4) no se aplican automáticamente: se evalúan antes de hacer merge.
 - **Snyk** bloquea el pipeline si encuentra vulnerabilidades altas o críticas. Como los jobs están encadenados, si falla no se ejecutan las pruebas, ni la imagen, ni el despliegue.
 - **SonarCloud** analiza la calidad del código y el pipeline espera su Quality Gate (`Sonar way`).
-- En `Settings → Rules`, `main` queda protegida exigiendo que pasen los checks `Snyk Security Scan`, `Run Tests with JaCoCo` y `SonarCloud Analysis` antes de hacer merge.
+- En `Settings → Rules → Rulesets`, el ruleset `proteger-main` (activo, sin excepciones) protege la rama `main`: exige Pull Request y que pasen los checks `Snyk Security Scan`, `Run Tests with JaCoCo` y `SonarCloud Analysis` antes de hacer merge.
 
 ![Dependabot](docs/img/04-dependabot.png)
 ![Snyk - dependencias](docs/img/06-snyk-dependencias.png)
@@ -258,8 +259,8 @@ El wallet que se usa en el despliegue contiene solo `cwallet.sso`, `tnsnames.ora
 ### Entorno de despliegue en AWS EC2
 El job `deploy` publica la aplicación en una instancia EC2 creada en AWS Academy:
 - **AMI:** Amazon Linux 2023, tipo `t3.small`, con IP elástica para que la dirección no cambie entre sesiones del laboratorio.
-- **Security Group:** entrada TCP 22 (SSH, usado por el pipeline) y TCP 8081 (la API).
-- **Preparación única de la instancia** (Docker y el plugin de Compose):
+- **Security Group:** entrada TCP 22 (SSH, usado por el pipeline), TCP 8081 (la API) y TCP 80 (página web en Apache).
+- **Preparación única de la instancia** (Docker, el plugin de Compose y Apache):
 ```bash
 sudo dnf install -y docker
 sudo systemctl enable --now docker
@@ -267,9 +268,12 @@ sudo usermod -aG docker ec2-user
 sudo mkdir -p /usr/local/lib/docker/cli-plugins
 sudo curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 -o /usr/local/lib/docker/cli-plugins/docker-compose
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+sudo dnf install -y httpd
+sudo systemctl enable --now httpd
 ```
 - **Flujo del despliegue:** el pipeline se conecta por SSH con `EC2_SSH_KEY`, copia `docker-compose.yml` y el wallet a `~/bdget`, escribe un `.env` con `APP_IMAGE` (etiquetada con el SHA del commit) y las credenciales, inicia sesión en GHCR desde la EC2, ejecuta `docker compose pull` y `docker compose up -d`, y espera a que el contenedor quede `healthy`.
-- **Verificación:** desde el runner se consulta `http://<IP-EC2>:8081/api/health`; con eso se valida también que el puerto 8081 esté abierto.
+- **Verificación:** la prueba de humo corre dentro de la EC2 contra `http://localhost:8081/api/health`, evitando tráfico HTTP en claro por internet. Que el puerto 8081 esté abierto hacia el exterior se comprueba abriendo `http://<IP-EC2>:8081/api/health` en el navegador.
+- **Página web:** `web/index.html` se copia a `/var/www/html` en cada despliegue (paso "Publicar pagina web" del job `deploy`) y se sirve con Apache en `http://<IP-EC2>`.
 - **Limitación conocida:** el SSH está abierto a cualquier IP porque los runners de GitHub no tienen IP fija; el acceso queda protegido por la llave privada, que solo existe como secreto del repositorio.
 
 ---
@@ -279,6 +283,7 @@ sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 - **Búsqueda de estudiantes por nombre**: endpoint `GET /students/search?name=` (búsqueda parcial, insensible a mayúsculas/minúsculas), implementado en las capas Repository, Service y Controller, con su test unitario correspondiente.
 - **Health Check**: endpoint `GET /api/health` que retorna el estado del servicio, usado por el healthcheck de Docker Compose y por la prueba de humo del despliegue.
 - **Hotfix**: corrección en `GlobalExceptionHandler` para capturar la ruta real donde ocurre un error no controlado (antes no se informaba el endpoint afectado), además de limpieza de imports duplicados.
+- **Página web de despliegue**: `web/index.html`, página estática que resume el pipeline y se publica automáticamente en Apache desde el job `deploy`.
 
 ## Declaración de Uso de Inteligencia Artificial
 
@@ -289,6 +294,7 @@ Se utilizó IA (Claude, de Anthropic) como apoyo técnico para:
 - Redactar un borrador de las secciones técnicas de este README.
 - Revisar y optimizar los tiempos del pipeline (un solo escaneo de Snyk, timeout del Quality Gate y healthcheck más rápido) y revisar este README.
 - Adaptar el job de despliegue para publicar en una instancia EC2 de AWS Academy por SSH, y orientar la preparación de la instancia (Docker, Security Group y secretos).
+- Generar el borrador de la página `web/index.html`, agregar al workflow el paso que la publica en Apache, actualizar este README y preparar un guion de apoyo para el video de la evaluación.
 
 Todo el contenido generado fue revisado, probado y validado por mí antes de integrarlo al repositorio: el pipeline se ejecutó completo en `main` y el despliegue quedó verificado. Las conclusiones y la reflexión personal fueron redactadas por mí; se usó IA únicamente para corregir ortografía y puntuación. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
 
