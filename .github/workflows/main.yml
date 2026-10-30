@@ -294,9 +294,17 @@ jobs:
       - name: Prueba de humo (/api/health)
         run: ssh ec2 'curl -fsS --retry 5 --retry-delay 5 --retry-connrefused http://localhost:8081/api/health'
 
+      # Publica la pagina estatica (web/index.html) en Apache (puerto 80).
+      # Requiere httpd instalado y activo en la EC2 (ver README).
+      - name: Publicar pagina web
+        run: |
+          scp web/index.html ec2:/tmp/index.html
+          ssh ec2 'sudo install -m 644 /tmp/index.html /var/www/html/index.html && rm -f /tmp/index.html'
+
       - name: Resumen del despliegue
         run: |
           echo "### Despliegue exitoso en AWS EC2" >> "$GITHUB_STEP_SUMMARY"
           echo "- Commit: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Imagen: \`${APP_IMAGE}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Health: puerto 8081, ruta /api/health" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pagina web: puerto 80" >> "$GITHUB_STEP_SUMMARY"
