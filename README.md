@@ -195,7 +195,7 @@ En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin pub
 ### Orquestación (IE5)
 `docker-compose.yml` define el servicio con:
 - Puerto `8081:8081`.
-- `healthcheck` sobre `/api/health` (cada 15 s, 5 reintentos, 60 s de gracia al arrancar).
+- `healthcheck` sobre `/api/health` (cada 5 s, 5 reintentos, 60 s de gracia al arrancar).
 - Límites y reservas de recursos: límite de **1 CPU y 1 GB**, reserva de 0,5 CPU y 512 MB.
 - `restart: unless-stopped`.
 - Endurecimiento: `no-new-privileges` y `cap_drop: ALL`.
@@ -266,6 +266,8 @@ Se utilizó IA (Claude, de Anthropic) como apoyo técnico para:
 - Orientar la configuración de Snyk, SonarCloud, los secretos de GitHub y el wallet de Oracle.
 - Ayudar a diagnosticar errores del pipeline (por ejemplo, el nombre de imagen inválido y el wallet incompleto).
 - Redactar un borrador de las secciones técnicas de este README.
+- Revisar y optimizar los tiempos del pipeline (un solo escaneo de Snyk, timeout del Quality Gate y healthcheck más rápido) y revisar este README.
+
 
 Todo el contenido generado fue revisado, probado y validado por mí antes de integrarlo al repositorio: el pipeline se ejecutó completo en `main` y el despliegue quedó verificado. Las conclusiones y la reflexión personal fueron redactadas por mí; se usó IA únicamente para corregir ortografía y puntuación. Más información sobre uso ético de IA: https://bibliotecas.duoc.cl/ia
 

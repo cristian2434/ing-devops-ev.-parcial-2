@@ -41,8 +41,8 @@ jobs:
       - name: Dar permiso de ejecucion al wrapper de Maven
         run: chmod +x mvnw
 
-      - name: Escaneo de dependencias
-        run: snyk test --file=pom.xml --severity-threshold=high
+      - name: Escaneo de dependencias (bloquea y genera reporte JSON)
+        run: snyk test --file=pom.xml --severity-threshold=high --json-file-output=snyk-report.json
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
@@ -53,20 +53,13 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      # Reporte REAL de Snyk como evidencia (se genera siempre). El bloqueo lo
-      # hacen los pasos anteriores; este solo guarda el resultado en JSON.
-      - name: Generar reporte JSON de Snyk
-        if: always()
-        run: snyk test --file=pom.xml --json > snyk-report.json || echo "Reporte generado con hallazgos"
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
       - name: Subir reporte de Snyk
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: snyk-report
           path: snyk-report.json
+          if-no-files-found: ignore
 
   # ---------------------------------------------------------------
   # 2) Pruebas unitarias + cobertura (JaCoCo). Falla si la cobertura
@@ -127,7 +120,8 @@ jobs:
             -Dsonar.organization=cristian2434 \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.wait=true \
+            -Dsonar.qualitygate.timeout=300
 
   # ---------------------------------------------------------------
   # 4) Empaquetado del JAR (igual que en la actividad).
