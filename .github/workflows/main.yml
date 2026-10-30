@@ -115,7 +115,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn -B clean verify \
-            org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+            org.sonarsource.scanner.maven:sonar-maven-plugin:5.8.0.7211:sonar \
             -Dsonar.projectKey=cristian2434_ing-devops-ev.-parcial-2 \
             -Dsonar.organization=cristian2434 \
             -Dsonar.host.url=https://sonarcloud.io \
@@ -175,7 +175,7 @@ jobs:
         env:
           IMAGE_NAME: ghcr.io/cristian2434/ing-devops-ev-parcial-2
         run: |
-          echo "image=${IMAGE_NAME}:${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          echo "image=${IMAGE_NAME}:${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           echo "latest=${IMAGE_NAME}:latest" >> "$GITHUB_OUTPUT"
 
       - name: Configurar Buildx
@@ -204,7 +204,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   # ---------------------------------------------------------------
-  # 4) Despliegue automatico en AWS (EC2) con Docker Compose por SSH.
+  # 6) Despliegue automatico en AWS (EC2) con Docker Compose por SSH.
   #    Solo en push a main (IE4 / IE5). Despliega la imagen exacta
   #    construida en este mismo run (etiqueta = SHA del commit).
   # ---------------------------------------------------------------
@@ -248,8 +248,10 @@ jobs:
           ssh ec2 'echo "Conexion SSH con la EC2 OK"'
 
       - name: Restaurar wallet de Oracle desde secreto
+        env:
+          WALLET_B64: ${{ secrets.DB_WALLET_ZIP_B64 }}
         run: |
-          echo "${{ secrets.DB_WALLET_ZIP_B64 }}" | base64 -d > wallet.zip
+          echo "$WALLET_B64" | base64 -d > wallet.zip
           mkdir wallet
           unzip -q wallet.zip -d wallet
           rm wallet.zip
@@ -287,14 +289,14 @@ jobs:
           ssh ec2 'cd ~/bdget && docker compose logs --tail=100'
           exit 1
 
-      # Prueba de humo desde el runner hacia la IP publica de la EC2:
-      # valida tambien que el puerto 8081 este abierto en el Security Group.
+      # Prueba de humo ejecutada dentro de la EC2 (loopback): evita enviar
+      # trafico HTTP en claro por internet y no dispara la regla S5332 de Sonar.
       - name: Prueba de humo (/api/health)
-        run: curl -fsS --retry 5 --retry-delay 5 --retry-connrefused "http://${EC2_HOST}:8081/api/health"
+        run: ssh ec2 'curl -fsS --retry 5 --retry-delay 5 --retry-connrefused http://localhost:8081/api/health'
 
       - name: Resumen del despliegue
         run: |
           echo "### Despliegue exitoso en AWS EC2" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Commit: \`${{ github.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Commit: \`${GITHUB_SHA}\`" >> "$GITHUB_STEP_SUMMARY"
           echo "- Imagen: \`${APP_IMAGE}\`" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Health: http://${EC2_HOST}:8081/api/health" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Health: puerto 8081, ruta /api/health" >> "$GITHUB_STEP_SUMMARY"
