@@ -212,6 +212,9 @@ En un Pull Request el pipeline llega hasta `docker` (construye la imagen sin pub
 ![Snyk - dependencias](docs/img/06-snyk-dependencias.png)
 ![Snyk - código](docs/img/06b-snyk-codigo.png)
 
+#### Hallazgos corregidos sin migrar de versión
+El 30-10-2026 Snyk detectó 5 hallazgos nuevos de severidad alta o crítica (4 en `tomcat-embed-core` 10.1.55 y 1 en `jackson-databind` 2.21.4) y bloqueó el pipeline. Como existía corrección dentro de la misma versión mayor, se resolvieron fijando `tomcat.version=10.1.61` y `jackson-bom.version=2.21.8` en el `pom.xml`, sin migrar a Spring Boot 4 ni agregar excepciones al `.snyk`.
+
 #### Riesgo aceptado temporalmente (`.snyk`)
 Tras actualizar a Spring Boot 3.5.15, Spring Cloud 2025.0.3 y JaCoCo 0.8.14, el escaneo bajó de 82 a **43 hallazgos** de severidad alta o crítica (Tomcat, Spring Framework, Logback, BouncyCastle y otras librerías internas de Spring). En todos, la corrección solo existe en **Spring Boot 4.0.0** (o Spring Cloud Config 5.0.5, que también exige Boot 4).
 
@@ -223,7 +226,7 @@ Migrar a Spring Boot 4 es un cambio mayor (otra versión de Hibernate y Jackson,
 - SonarCloud midió en este análisis **100 % de cobertura**, **0 % de duplicación** y el Quality Gate en estado **Passed**. El 70 % es el umbral que bloquea el pipeline; el 100 % es lo medido.
 
 ![SonarCloud - Quality Gate](docs/img/05-sonarcloud.png)
-![SonarCloud - cobertura](docs/img/05b-sonarcloud-cobertura.png)
+![SonarCloud - cobertura](docs/img/05b-sonarcloud-cobertura.webp)
 
 ### Trazabilidad (IE4)
 - Cada imagen se publica en GHCR etiquetada con el **SHA del commit** y con `latest`, y lleva labels OCI (`revision`, `source`).
